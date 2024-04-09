@@ -8,19 +8,18 @@
     "node": "16.x"
   },
   "scripts": {
-    "start": "node app.js",
-    "register": "node commands.js",
-    "dev": "nodemon app.js"
+    "start": "bun src/app.ts",
+    "register": "bun commands.js",
+    "dev": "bun --watch src/app.ts"
   },
   "author": "Shay DeWael",
   "license": "MIT",
   "dependencies": {
     "discord-interactions": "^3.2.0",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "node-fetch": "^3.3.0"
+    "hono": "^4.2.3"
   },
   "devDependencies": {
-    "nodemon": "^2.0.15"
+    "bun-types": "^1.1.3",
+    "discord-api-types": "^0.37.79"
   }
 }
