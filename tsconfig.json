@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "strict": true,
+        "isolatedModules": true,
         "lib": ["ESNext"],
         "types": [
             "bun-types",

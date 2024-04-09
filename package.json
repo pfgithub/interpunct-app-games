@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "bun src/app.ts",
-    "register": "bun commands.js",
+    "register": "bun src/commands.ts",
     "dev": "bun --watch src/app.ts"
   },
   "author": "Shay DeWael",

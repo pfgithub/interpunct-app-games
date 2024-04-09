@@ -1,33 +1,34 @@
+import * as d from "discord-api-types/v10";
 import { discordRequest } from './util';
 
 // TODO copy interpunct impl
 
+// https://github.com/discordjs/discord-api-types/pull/921
+// once that is merged we can delete this stuff
+// and that is waiting on discord api clarification
+enum ApplicationIntegrationType {
+    GuildInstall = 0,
+    UserInstall = 1,
+}
+export enum InteractionContextType {
+	Guild = 0,
+	BotDM = 1,
+	PrivateChannel = 2,
+}
+
 // Wiki command for game lookup
-const WIKI_COMMAND = {
-    name: 'wiki',
+const WIKI_COMMAND: (d.RESTPostAPIChatInputApplicationCommandsJSONBody & {
+    integration_types: ApplicationIntegrationType[],
+    contexts: InteractionContextType[] | null;
+}) = {
+    name: 'panel',
     type: 1,
-    description: 'Lookup information in wiki',
-    options: [
-        {
-            type: 3,
-            name: 'item',
-            description: 'Item to lookup',
-            choices: [
-                {
-                    name: 'Map',
-                    value: 'item_map',
-                    emoji: ':map:',
-                    description: 'A detailed map that reveals hidden paths and secret locations'
-                },
-            ],
-            required: true,
-        },
-    ],
-    integration_types: [0, 1],
-    contexts: [0, 1, 2],
+    description: 'sample panel',
+    integration_types: [ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall],
+    contexts: [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel],
 };
 
-const ALL_COMMANDS = [
+const ALL_COMMANDS: d.RESTPostAPIApplicationCommandsJSONBody[] = [
     WIKI_COMMAND,
 ];
 

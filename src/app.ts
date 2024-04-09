@@ -1,39 +1,70 @@
 import { Hono } from "hono";
-import { logger } from 'hono/logger'
-import { APIChatInputApplicationCommandInteractionData, APIInteraction, APIInteractionResponse, InteractionResponseType, InteractionType } from "discord-api-types/v10";
+import { logger } from 'hono/logger';
+import * as d from "discord-api-types/v10";
 import { verifyKey } from "discord-interactions";
+import DemoPanel from "./panels/demo";
+import { ButtonCallback, withResponseState } from "./lib/panel";
 
-async function handle(request: APIInteraction): Promise<APIInteractionResponse> {
-    if (request.type === InteractionType.Ping) {
-        return { type: InteractionResponseType.Pong }
+const common_actions: {[key: string]: ButtonCallback} = {
+    "DEMO": (): d.APIInteractionResponse => {
+        return {
+            type: d.InteractionResponseType.ChannelMessageWithSource,
+            data: {
+                content: "you clicked me!",
+                flags: d.MessageFlags.Ephemeral,
+            },
+        };
+    },
+};
+
+function handleInteraction(action: string): d.APIInteractionResponse {
+    if(Object.hasOwn(common_actions, action)) {
+        return common_actions[action]();
+    }else{
+        return {
+            type: d.InteractionResponseType.ChannelMessageWithSource,
+            data: {
+                content: `abc!`,
+                flags: d.MessageFlags.Ephemeral,
+            },
+        };
+    }
+}
+
+async function handle(request: d.APIInteraction): Promise<d.APIInteractionResponse> {
+    if (request.type === d.InteractionType.Ping) {
+        return { type: d.InteractionResponseType.Pong }
     }
     
-    if (request.type === InteractionType.ApplicationCommand) {
+    if (request.type === d.InteractionType.ApplicationCommand) {
         const data = request.data;
         const { name } = data;
 
-        // "wiki" command
-        if (name === 'wiki') {
-            const data_ = data as APIChatInputApplicationCommandInteractionData;
-            const option = data_.options![0];
-            // Send a message into the channel where command was triggered from
+        // the root of the app will be a router which has callbacks to route handlers
+        // to render, we will render the whole command router with the command, and it will return the action.
+        if (name === "panel") {
+            const data_ = data as d.APIChatInputApplicationCommandInteractionData;
+
+            const id = crypto.randomUUID();
+            const rsp = {
+                interaction_id: id,
+                handlers: {},
+                persistent: false,
+            };
+            const resp = withResponseState(rsp, () => DemoPanel());
+            if(rsp.persistent) throw new Error("TODO impl persistence");
+
             return {
-                type: InteractionResponseType.ChannelMessageWithSource,
-                data: {
-                    content: `abc!`,
-                },
+                type: d.InteractionResponseType.ChannelMessageWithSource,
+                data: resp,
             };
         }
     }
 
     // handle button interaction
-    if (request.type === InteractionType.MessageComponent) {
-        return {
-            type: InteractionResponseType.ChannelMessageWithSource,
-            data: {
-                content: `abc!`,
-            },
-        };
+    if (request.type === d.InteractionType.MessageComponent) {
+        const [action, descriminator] = request.data.custom_id.split("|");
+        return handleInteraction(action);
     }
 
     console.log("TODO "+request.type);
@@ -55,7 +86,7 @@ app.post("/interactions", async (c) => {
     }
 
     const request = JSON.parse(new TextDecoder().decode(new Uint8Array(body_buf)));
-    const response: APIInteractionResponse = await handle(request);
+    const response: d.APIInteractionResponse = await handle(request);
     console.log("req: ", request);
     console.log("-> ", response);
 
