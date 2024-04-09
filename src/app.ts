@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { logger } from 'hono/logger'
-import { APIApplicationCommand, APIApplicationCommandInteraction, APIChatInputApplicationCommandInteractionData, APIInteraction, APIInteractionResponse, InteractionResponseType, InteractionType } from "discord-api-types/v10";
+import { APIChatInputApplicationCommandInteractionData, APIInteraction, APIInteractionResponse, InteractionResponseType, InteractionType } from "discord-api-types/v10";
 import { verifyKey } from "discord-interactions";
 
 async function handle(request: APIInteraction): Promise<APIInteractionResponse> {
